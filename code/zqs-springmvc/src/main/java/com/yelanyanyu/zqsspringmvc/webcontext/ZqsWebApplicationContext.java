@@ -11,14 +11,17 @@ public class ZqsWebApplicationContext {
     private final Map<String, Object> ioc = new HashMap<>();
     private String basePackage;
 
-    public ZqsWebApplicationContext() {
-    }
 
     public ZqsWebApplicationContext(String basePackage) {
         this.basePackage = basePackage;
+        init();
     }
 
     public void init() {
+
+    }
+
+    public void injectSingleObjs() {
 
     }
 }
