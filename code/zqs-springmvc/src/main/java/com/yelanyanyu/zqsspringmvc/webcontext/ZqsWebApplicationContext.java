@@ -1,10 +1,12 @@
 package com.yelanyanyu.zqsspringmvc.webcontext;
 
+import com.yelanyanyu.zqsspringmvc.annotation.Autowired;
 import com.yelanyanyu.zqsspringmvc.annotation.Controller;
 import com.yelanyanyu.zqsspringmvc.annotation.Service;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -31,6 +33,15 @@ public class ZqsWebApplicationContext {
         this.basePackage = basePackage;
         init();
     }
+
+    public Map<String, Object> getIoc() {
+        return ioc;
+    }
+
+    public List<String> getClassFullPaths() {
+        return classFullPaths;
+    }
+
 
     /**
      * 完全容器的初始化
@@ -111,6 +122,34 @@ public class ZqsWebApplicationContext {
      * 处理ioc中的类的自动装配
      */
     public void executeAutowired() {
+        if (ioc.isEmpty()) {
+            return;
+        }
+        try {
+            for (Map.Entry<String, Object> entry : ioc.entrySet()) {
+                Object bean = entry.getValue();
+                for (Field field : bean.getClass().getDeclaredFields()) {
+                    if (field.isAnnotationPresent(Autowired.class)) {
+                        field.setAccessible(true);
 
+                        Autowired annotation = field.getAnnotation(Autowired.class);
+                        String beanName = annotation.value();
+                        if (StringUtils.isEmpty(beanName)) {
+                            beanName = StringUtils.uncapitalize(field.getType().getSimpleName());
+                        }
+
+                        Object o = ioc.get(beanName);
+                        if (o == null) {
+                            throw new RuntimeException("装配失败,没有该对象");
+                        }
+
+                        field.set(bean, o);
+
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
