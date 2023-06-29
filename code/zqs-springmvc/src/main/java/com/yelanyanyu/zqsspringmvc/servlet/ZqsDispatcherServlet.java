@@ -91,9 +91,18 @@ public class ZqsDispatcherServlet extends HttpServlet {
                 for (Map.Entry<String, String[]> entry : requestParameterMap.entrySet()) {
                     String reqParamName = entry.getKey();
                     String[] reqParamVal = entry.getValue();
-                    int indexOfParam = getIndexOfParam(parameters, reqParamName);
-                    //测试reqParamName是否已经改变
-                    System.out.println(reqParamName);
+                    int indexOfParam = -1;
+                    String paramName;
+                    for (int i = 0; i < parameters.length; i++) {
+                        paramName = parameters[i].getName();
+                        if (parameters[i].isAnnotationPresent(RequestParam.class)) {
+                            paramName = parameters[i].getAnnotation(RequestParam.class).value();
+                        }
+                        if (reqParamName.equals(paramName)) {
+                            indexOfParam = i;
+                            break;
+                        }
+                    }
                     if (indexOfParam == -1) {
                         throw new IllegalArgumentException("参数(" + reqParamName + ")不匹配");
                     }
@@ -125,18 +134,6 @@ public class ZqsDispatcherServlet extends HttpServlet {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private int getIndexOfParam(Parameter[] parameters, String reqParamName) {
-        for (int i = 0; i < parameters.length; i++) {
-            if (parameters[i].isAnnotationPresent(RequestParam.class)) {
-                reqParamName = parameters[i].getAnnotation(RequestParam.class).value();
-            }
-            if (parameters[i].getName().equals(reqParamName)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private Object matchType(Parameter parameter, String val) {
