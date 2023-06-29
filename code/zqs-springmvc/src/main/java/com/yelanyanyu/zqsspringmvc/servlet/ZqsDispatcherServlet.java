@@ -31,6 +31,13 @@ public class ZqsDispatcherServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("ZqsDispatcherServlet...");
+
     }
+
+    private void requestHandler(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+
+
 }

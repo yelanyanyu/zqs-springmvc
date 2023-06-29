@@ -1,5 +1,9 @@
 package com.yelanyanyu.zqsspringmvc.webcontext;
 
+import com.yelanyanyu.zqsspringmvc.annotation.Controller;
+import com.yelanyanyu.zqsspringmvc.annotation.Service;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.util.*;
 
@@ -38,6 +42,7 @@ public class ZqsWebApplicationContext {
         }
         //注入单例对象
         injectSingleObjs();
+        executeAutowired();
     }
 
 
@@ -71,6 +76,41 @@ public class ZqsWebApplicationContext {
      * 根据classFullPaths，通过反射生成对象实例加入ioc中
      */
     public void injectSingleObjs() {
+        if (classFullPaths.isEmpty()) {
+            return;
+        }
+        //需要加入ioc的类:被Controller、Service修饰的类
+        try {
+            for (String classFullPath : classFullPaths) {
+                Class<?> aClass = Class.forName(classFullPath);
+                if (aClass.isAnnotationPresent(Controller.class)) {
+                    Controller annotation = aClass.getAnnotation(Controller.class);
+                    String name = annotation.value();
+                    if (StringUtils.isEmpty(name)) {
+                        name = StringUtils.uncapitalize(aClass.getSimpleName());
+                    }
+                    ioc.put(name, aClass.newInstance());
+                } else if (aClass.isAnnotationPresent(Service.class)) {
+                    Service annotation = aClass.getAnnotation(Service.class);
+                    String name = annotation.value();
+                    if (StringUtils.isEmpty(name)) {
+                        Object o = aClass.newInstance();
+                        for (Class<?> anInterface : aClass.getInterfaces()) {
+                            name = StringUtils.uncapitalize(anInterface.getSimpleName());
+                            ioc.put(name, o);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 处理ioc中的类的自动装配
+     */
+    public void executeAutowired() {
 
     }
 }

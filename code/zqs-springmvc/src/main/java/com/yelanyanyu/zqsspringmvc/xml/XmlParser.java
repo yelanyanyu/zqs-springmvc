@@ -21,7 +21,6 @@ public class XmlParser {
      */
     public static String getBasePackage(String xmlFileName) {
         InputStream is = XmlParser.class.getClassLoader().getResourceAsStream(xmlFileName);
-        System.out.println(is);
         SAXReader saxReader = new SAXReader();
         try {
             Document document = saxReader.read(is);
